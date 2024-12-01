@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fruit Freshness Classification</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <h1>Fruit Freshness Classification</h1>
+    <div class="input-container">
+      <div>
+        <h3>Upload Image</h3>
+        <input type="file" id="imageUpload" accept="image/*" />
+      </div>
+      <div>
+        <h3>Use Webcam</h3>
+        <div>
+          <button id="startWebcam">Start Webcam</button>
+          <button id="stopWebcam">Stop Webcam</button>
+        </div>
+        <video id="video" style="display: none" autoplay></video>
+        <button id="captureFrame" style="display: none">Capture Frame</button>
+      </div>
+    </div>
+    <div id="imageContainer"></div>
+    <script>
+      const imageUpload = document.getElementById("imageUpload");
+      const startWebcamBtn = document.getElementById("startWebcam");
+      const stopWebcamBtn = document.getElementById("stopWebcam");
+      const videoElement = document.getElementById("video");
+      const captureFrameBtn = document.getElementById("captureFrame");
+      const imageContainer = document.getElementById("imageContainer");
+
+      // Image Upload Handler
+      imageUpload.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const response = await fetch("/detect", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+
+          // Display processed image
+          imageContainer.innerHTML = `
+                    <h3>Detected Objects</h3>
+                    <img src="data:image/jpeg;base64,${data.image}" alt="Detected Objects">
+                `;
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      });
+
+      // Webcam Handling
+      startWebcamBtn.addEventListener("click", async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          videoElement.srcObject = stream;
+          videoElement.style.display = "block";
+          videoElement.play();
+          captureFrameBtn.style.display = "block";
+        } catch (error) {
+          console.error("Error accessing webcam:", error);
+        }
+      });
+
+      stopWebcamBtn.addEventListener("click", () => {
+        videoElement.pause();
+        videoElement.srcObject.getTracks().forEach((track) => track.stop());
+        videoElement.style.display = "none";
+        captureFrameBtn.style.display = "none";
+      });
+
+      // Capture Frame Handler
+      captureFrameBtn.addEventListener("click", async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        canvas.getContext("2d").drawImage(videoElement, 0, 0);
+
+        const imageDataUrl = canvas.toDataURL("image/jpeg");
+
+        try {
+          const response = await fetch("/detect", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image: imageDataUrl }),
+          });
+          const data = await response.json();
+
+          // Display processed image
+          imageContainer.innerHTML = `
+                    <h3>Detection</h3>
+                    <img id="detectedFruits" src="data:image/jpeg;base64,${data.image}" alt="Detected Objects">
+                `;
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      });
+    </script>
+  </body>
+</html>
