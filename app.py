@@ -8,8 +8,8 @@ import numpy as np
 
 app = Flask(__name__)
 
-# model = YOLO('models/best2.pt')
-model = YOLO('models/yolo11n.pt')
+model = YOLO('models/best2.pt')
+# model = YOLO('models/yolo11n.pt')
 
 
 def process_image(image):
