@@ -13,12 +13,6 @@ model = YOLO('models/best2.pt')
 
 
 def process_image(image):
-    """
-    Process image with YOLO and return annotated image
-    :param image: PIL Image or numpy array
-    :return: Base64 encoded image with bounding boxes
-    """
-
     results = model.predict(image)
     annotated_image = results[0].plot()
 

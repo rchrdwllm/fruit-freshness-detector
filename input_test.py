@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 import cv2
 
-model = YOLO("models/best.pt")
+model = YOLO("models/best2.pt")
 classNames = model.names
 
 results = model.predict(source="images/rotten_banana2.jpg")
