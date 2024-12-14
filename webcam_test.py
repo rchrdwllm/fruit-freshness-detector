@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 import math
 
-model = YOLO("models/best.pt")
+model = YOLO("models/best2.pt")
 video = cv2.VideoCapture(0)
 classNames = model.names
 
